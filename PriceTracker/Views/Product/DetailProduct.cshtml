@@ -1,0 +1,250 @@
+﻿
+@model IEnumerable<PriceTracker.Models.ProductionInformation>
+
+@{ 
+    ViewData["Title"] = "Details Product";
+}
+
+<div class="container">
+    <div class="row alert alert-secondary">
+        <div class="input-group">
+            <div class="col-1 p-0">
+                <select class="form-control form-control-sm" id="startDay">
+
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">8</option>
+                    <option value="9">10</option>
+                </select>
+            </div>
+            <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+            </div>
+            <div class="col-1 p-0">
+                <select class="form-control form-control-sm" id="endDay">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">8</option>
+                    <option value="9">10</option>
+                </select>
+            </div>
+            <div class="col-4 p-0">
+
+                <select class="form-control form-control-sm" id="month">
+                    <option value="1">January</option>
+                    <option value="2">Febuary</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+
+            <div class="col-4 p-0">
+                <button type="button" class="btn btn-outline-dark btn-sm" id="btnFilter">Filter</button>
+            </div>
+        </div>
+       
+
+    </div>
+</div>
+<canvas id="graphic">
+
+
+
+</canvas>
+
+
+<p>
+    <a asp-controller="ProductionInformation" asp-action="NewInformation" asp-route-productId="@ViewData["ProductId"]" class="btn btn-outline-success btn-sm">New Information</a>
+</p>
+
+<table class="table table-hover table-sm">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.value)
+            </th>
+            <th>
+                Date Of Information
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var item in Model)
+            {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.value)
+            </td>
+            <td>
+                @String.Format("{0}/{1}/{2}",item.Day,item.Month,item.Year)
+            </td>
+        </tr>
+            }
+    </tbody>
+</table>
+
+@section Scripts{
+
+<script>
+    $(document).ready(function (){
+    const productId = $("productId").val();
+    const startDay = 1;
+    const endDay = 31;
+    const month = new Date().getMonth() + 1;
+    const year = new Date().getFullYear();
+    
+
+     if(startDay <= endDay){
+
+      alert("Invalid Dates");   
+
+}
+
+else{
+     GetGraphicData(productId,startDay,endDay,month,year);
+}
+
+    GetGraphicData(productId,startDay,endDay,month,year);
+    });
+      
+     function GetGraphicData(productId,startDay,endDay,month,year){
+
+      $.ajax({
+
+        method:"GET",
+        url:"/Products/GraphicData";
+        data:{
+         productId:productId,
+         startDay:startDay,
+         endDay : endDay,
+         month:month,
+         year:year
+       
+ },
+
+ success:function(data){
+
+new Chart(document.getElementById("graphic"),{
+         type:"line",
+         data:[{
+            labels:GetDates(data),
+            datasets:[{
+               label:"Price of Product",
+               data: GetValues(data),
+               backgroundColor:"#fff",
+               borderColor:"#c23616",
+               pointBorderColor:"#c23616",
+               pointStyle:"circle",
+               fill:false,
+               spanGaps:true
+
+}]
+
+
+},
+
+             options: {
+             animation:{
+                easing:"linear",
+},
+             legend:{
+                 labels: {
+                   usePointStyle:true
+}
+
+
+},
+
+              scales:{
+                   xAxes:[{
+
+                    gridlines:{
+                      display:false
+}
+
+}],
+
+                     yAxes:[{
+
+                    gridlines:{
+                      display:false
+}
+
+}],
+}
+
+}
+})
+
+
+
+
+}
+
+
+
+
+});
+
+}
+
+
+function GetDates(data){
+
+
+      let index = 0;
+      let dates = [];
+
+      while(index < data.length){
+          
+          dates.push('' + data[index].Day + '/' + data[index].Month + '/' + data[index].year);
+          index = index + 1;
+
+}
+
+    return dates;
+}
+
+
+
+
+function GetValues(data){
+
+
+      let index = 0;
+      let values = [];
+
+      while(index < data.length){
+          
+          values.push(data[index].values);
+          index = index + 1;
+
+}
+
+    return values;
+}
+
+</script>
+
+
+ }
